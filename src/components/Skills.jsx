@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Skills() {
   const skillsRef = useRef(null);
+  const overlayRef = useRef(null);
   const isInView = useInView(skillsRef, { once: true, amount: 0.4 });
 
   // Memoize skills array to prevent re-renders
@@ -41,7 +42,7 @@ export default function Skills() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: skillsRef.current,
-          start: "top 80%",
+          start: "top 75%",
           toggleActions: "play none none none",
         },
       });
@@ -49,31 +50,47 @@ export default function Skills() {
       // Animate heading and description
       tl.fromTo(
         skillsRef.current.querySelectorAll(".skills-content > :first-child, .skills-content > :nth-child(2)"),
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.2 }
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
       );
 
       // Animate skill cards
       tl.fromTo(
         skillsRef.current.querySelectorAll(".skill-card"),
-        { opacity: 0, y: 40, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "power3.out" },
-        "-=0.4"
+        { opacity: 0, y: 50, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: "back.out(1.2)" },
+        "-=0.6"
+      );
+
+      // Parallax effect for overlay
+      gsap.fromTo(
+        overlayRef.current,
+        { y: -50 },
+        {
+          y: 50,
+          scrollTrigger: {
+            trigger: skillsRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.5,
+          },
+        }
       );
 
       // Animate individual skill items on hover
       const skillItems = skillsRef.current.querySelectorAll(".skill-item");
       skillItems.forEach((item) => {
         item.addEventListener("mouseenter", () => {
-          gsap.to(item, { x: 8, duration: 0.3, ease: "power2.out" });
+          gsap.to(item, { x: 10, scale: 1.05, duration: 0.4, ease: "back.out(1.4)" });
         });
         item.addEventListener("mouseleave", () => {
-          gsap.to(item, { x: 0, duration: 0.3, ease: "power2.out" });
+          gsap.to(item, { x: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" });
         });
       });
 
       return () => {
         tl.kill();
+        ScrollTrigger.getAll().forEach((st) => st.kill());
         skillItems.forEach((item) => {
           item.removeEventListener("mouseenter", () => {});
           item.removeEventListener("mouseleave", () => {});
@@ -86,60 +103,64 @@ export default function Skills() {
     <section
       id="skills"
       ref={skillsRef}
-      className="relative min-h-screen flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-200"
+      className="relative min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-200 overflow-hidden"
       aria-labelledby="skills-title"
       aria-describedby="skills-description"
     >
       {/* Glassmorphism Overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-white/40 via-gray-100/20 to-white/60 backdrop-blur-lg transition-all duration-500" />
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-0 bg-gradient-to-br from-white/25 via-gray-100/15 to-white/50 backdrop-blur-xl transition-all duration-700"
+      />
 
       {/* Skills Content */}
       <motion.div
-        className="z-10 max-w-6xl mx-auto text-center skills-content"
+        className="z-10 max-w-7xl mx-auto text-center skills-content"
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1 }}
       >
         <motion.h2
           id="skills-title"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700"
-          initial={{ opacity: 0, y: -20 }}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 drop-shadow-md"
+          initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
         >
           My Skills
         </motion.h2>
 
         <motion.p
           id="skills-description"
-          className="mt-4 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto tracking-wide font-medium"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
         >
           A versatile skill set spanning programming, web development, design, and 3D modeling, driven by strong problem-solving and adaptability.
         </motion.p>
 
         {/* Skills Grid */}
         <motion.div
-          className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
         >
           {skills.map((skillGroup, index) => (
             <motion.div
               key={index}
-              className="skill-card bg-white/50 backdrop-blur-lg rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100/50"
-              whileHover={{ scale: 1.03, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
+              className="skill-card relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
+              whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? 1 : -1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
               whileTap={{ scale: 0.98 }}
               role="group"
               aria-label={`Skills in ${skillGroup.category}`}
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && e.currentTarget.focus()}
             >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{skillGroup.category}</h3>
-              <ul className="text-sm text-gray-700 space-y-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-white/10 rounded-2xl" />
+              <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight mb-5">{skillGroup.category}</h3>
+              <ul className="relative text-sm text-gray-700 space-y-3">
                 {skillGroup.items.map((item, i) => (
                   <motion.li
                     key={i}
@@ -149,7 +170,7 @@ export default function Skills() {
                     role="listitem"
                     onKeyDown={(e) => e.key === "Enter" && e.currentTarget.focus()}
                   >
-                    <span className="w-2 h-2 bg-gray-600 rounded-full mr-3"></span>
+                    <span className="w-2.5 h-2.5 bg-gray-600 rounded-full mr-3.5"></span>
                     {item}
                   </motion.li>
                 ))}
@@ -161,12 +182,17 @@ export default function Skills() {
         <motion.a
           href="#projects"
           onClick={(e) => handleNavClick(e, "#projects")}
-          className="mt-12 inline-block px-8 py-3 rounded-full border border-gray-900 text-gray-900 font-medium bg-white/90 hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-12 inline-block px-10 py-4 rounded-full border border-gray-900 text-gray-900 font-semibold bg-white/95 hover:text-white transition-all duration-400 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          whileHover={{ scale: 1.05, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
-          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+          whileHover={{
+            scale: 1.08,
+            background: "linear-gradient(to right, #1f2937, #374151)",
+            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.25)",
+            rotate: 1,
+          }}
+          whileTap={{ scale: 0.92 }}
           aria-label="View my projects"
         >
           View My Projects

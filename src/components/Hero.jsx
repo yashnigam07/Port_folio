@@ -29,19 +29,31 @@ export default function Hero() {
           await tsParticles.load("tsparticles", {
             fullScreen: false,
             particles: {
-              number: { value: 20, density: { enable: true, value_area: 1000 } },
-              size: { value: { min: 1, max: 3 }, random: true },
-              color: { value: "#4b5563" },
-              links: { enable: true, color: "#6b7280", distance: 120, opacity: 0.4, width: 0.8 },
-              move: { enable: true, speed: { min: 0.1, max: 0.4 }, outModes: { default: "out" } },
+              number: { value: 25, density: { enable: true, value_area: 1200 } },
+              size: { value: { min: 0.5, max: 4 }, random: true, anim: { enable: true, speed: 1, size_min: 0.3 } },
+              color: { value: ["#4b5563", "#6b7280", "#374151"] },
+              links: { enable: true, color: "#6b7280", distance: 130, opacity: 0.3, width: 0.6 },
+              move: { 
+                enable: true, 
+                speed: { min: 0.05, max: 0.3 }, 
+                outModes: { default: "out" },
+                random: true,
+                attract: { enable: true, rotateX: 600, rotateY: 1200 }
+              },
             },
             interactivity: {
               detectsOn: "parent",
-              events: { onHover: { enable: true, mode: "grab" }, onClick: { enable: true, mode: "push" } },
-              modes: { grab: { distance: 140, links: { opacity: 0.5 } }, push: { quantity: 1 } },
+              events: { 
+                onHover: { enable: true, mode: "grab" }, 
+                onClick: { enable: true, mode: "bubble" } 
+              },
+              modes: { 
+                grab: { distance: 150, links: { opacity: 0.4 } }, 
+                bubble: { distance: 200, size: 6, duration: 0.8, opacity: 0.6 }
+              },
             },
             background: { color: "transparent" },
-            performance: { fpsLimit: 60, detectRetina: true },
+            performance: { fpsLimit: 120, detectRetina: true },
           });
         } catch (error) {
           console.error("Failed to load tsparticles:", error);
@@ -55,14 +67,14 @@ export default function Hero() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: heroRef.current,
-          start: "top 80%",
+          start: "top 75%",
           toggleActions: "play none none none",
         },
       });
       tl.fromTo(
-        heroRef.current.querySelector(".hero-content"),
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1, ease: "power4.out", stagger: 0.2 }
+        heroRef.current.querySelectorAll(".hero-content > *"),
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.2)", stagger: 0.25 }
       );
 
       return () => {
@@ -89,30 +101,30 @@ export default function Hero() {
       />
 
       {/* Glass Gradient Overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/40 via-gray-100/20 to-white/60 backdrop-blur-lg transition-all duration-500" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/30 via-gray-100/10 to-white/50 backdrop-blur-xl transition-all duration-700" />
 
       {/* Hero Content */}
       <motion.div
-        className="z-10 max-w-5xl mx-auto hero-content"
-        initial={{ opacity: 0, y: 50 }}
+        className="z-10 max-w-6xl mx-auto hero-content"
+        initial={{ opacity: 0, y: 60 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 1, ease: [0.6, -0.05, 0.01, 0.99] }}
       >
         <motion.h1
           id="hero-title"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700"
-          initial={{ opacity: 0, y: -20 }}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 drop-shadow-md"
+          initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
         >
           Yash Nigam
         </motion.h1>
 
         <motion.p
-          className="mt-4 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-5 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto tracking-wide font-medium"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
         >
           Frontend Developer & Creative Technologist — crafting immersive, interactive, and elegant digital experiences with modern technology.
         </motion.p>
@@ -120,9 +132,13 @@ export default function Hero() {
         <motion.a
           href="#projects"
           onClick={(e) => handleNavClick(e, "#projects")}
-          whileHover={{ scale: 1.05, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-8 inline-block px-8 py-3 rounded-full border border-gray-900 text-gray-900 font-medium bg-white/90 hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+          whileHover={{ 
+            scale: 1.08, 
+            background: "linear-gradient(to right, #1f2937, #374151)", 
+            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.25)" 
+          }}
+          whileTap={{ scale: 0.92 }}
+          className="mt-10 inline-block px-10 py-4 rounded-full border border-gray-900 text-gray-900 font-semibold bg-white/95 hover:text-white transition-all duration-400 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
           aria-label="View my projects"
         >
           View Projects
@@ -131,18 +147,18 @@ export default function Hero() {
 
       {/* Scroll Indicator */}
       <motion.div
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-        animate={{ y: [0, 12, 0] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+        animate={{ y: [0, 15, 0], opacity: [1, 0.7, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         role="presentation"
         aria-hidden="true"
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.15 }}
       >
-        <div className="w-5 h-10 border-2 border-gray-800 rounded-full flex items-start justify-center">
+        <div className="w-6 h-12 border-2 border-gray-800 rounded-full flex items-start justify-center shadow-sm">
           <motion.div
-            className="w-1.5 h-1.5 mt-1.5 bg-gray-800 rounded-full"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            className="w-2 h-2 mt-2 bg-gray-800 rounded-full"
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
       </motion.div>

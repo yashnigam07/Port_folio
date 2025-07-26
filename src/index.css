@@ -3,16 +3,4 @@ body {
   @apply bg-white text-black font-sans transition-colors duration-300;
   font-family: 'Inter', sans-serif;
 }
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 40s linear infinite;
-}
 

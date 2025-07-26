@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
   const aboutRef = useRef(null);
+  const overlayRef = useRef(null);
   const isInView = useInView(aboutRef, { once: true, amount: 0.5 });
 
   // Handle smooth scrolling
@@ -23,18 +24,34 @@ export default function About() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: aboutRef.current,
-          start: "top 80%",
+          start: "top 75%",
           toggleActions: "play none none none",
         },
       });
       tl.fromTo(
         aboutRef.current.querySelectorAll(".about-content > *"),
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.2 }
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
+      );
+
+      // Parallax effect for overlay
+      gsap.fromTo(
+        overlayRef.current,
+        { y: -50 },
+        {
+          y: 50,
+          scrollTrigger: {
+            trigger: aboutRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.5,
+          },
+        }
       );
 
       return () => {
         tl.kill();
+        ScrollTrigger.getAll().forEach((st) => st.kill());
       };
     }
   }, [isInView]);
@@ -43,68 +60,85 @@ export default function About() {
     <section
       id="about"
       ref={aboutRef}
-      className="relative min-h-screen flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white"
+      className="relative min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white overflow-hidden"
       aria-labelledby="about-title"
       aria-describedby="about-description"
     >
       {/* Glass Gradient Overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/40 via-gray-100/20 to-white/60 backdrop-blur-lg transition-all duration-500" />
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-0 bg-gradient-to-b from-white/25 via-gray-100/15 to-white/50 backdrop-blur-xl transition-all duration-700"
+      />
 
       {/* About Content */}
       <motion.div
-        className="z-10 max-w-5xl mx-auto text-center about-content"
+        className="z-10 max-w-6xl mx-auto text-center about-content"
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1 }}
       >
         <motion.h2
           id="about-title"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700"
-          initial={{ opacity: 0, y: -20 }}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 drop-shadow-md"
+          initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
         >
           About Me
         </motion.h2>
 
         <motion.p
           id="about-description"
-          className="mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-8 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto tracking-wide font-medium"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
         >
           I'm Yash Nigam, a passionate B.Sc. Electronics student at Sri Venkateswara College, University of Delhi, graduating in 2026. As a Frontend Developer and Creative Technologist, I blend technology and creativity to build immersive digital experiences. My journey is fueled by innovation, from crafting elegant web interfaces to exploring 3D modeling and IoT solutions.
         </motion.p>
 
         {/* Education Section */}
         <motion.div
-          className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
         >
-          <div className="bg-white/50 backdrop-blur-md rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300">
-            <h3 className="text-lg font-semibold text-gray-900">B.Sc. (H) Electronics</h3>
-            <p className="text-sm text-gray-700 mt-2">Sri Venkateswara College, University of Delhi</p>
-            <p className="text-sm text-gray-700">2023 – 2026 | 6.45 CGPA</p>
-          </div>
-          <div className="bg-white/50 backdrop-blur-md rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300">
-            <h3 className="text-lg font-semibold text-gray-900">High School</h3>
-            <p className="text-sm text-gray-700 mt-2">Kendriya Vidyalaya, Delhi</p>
-            <p className="text-sm text-gray-700">Class XII (2022): 78% | Class X (2020): 79%</p>
-          </div>
+          <motion.div
+            className="relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
+            whileHover={{ scale: 1.05, rotate: 1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-white/10 rounded-2xl" />
+            <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight">B.Sc. (H) Electronics</h3>
+            <p className="relative text-sm text-gray-700 mt-3">Sri Venkateswara College, University of Delhi</p>
+            <p className="relative text-sm text-gray-700">2023 – 2026 | 6.45 CGPA</p>
+          </motion.div>
+          <motion.div
+            className="relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
+            whileHover={{ scale: 1.05, rotate: -1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-white/10 rounded-2xl" />
+            <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight">High School</h3>
+            <p className="relative text-sm text-gray-700 mt-3">Kendriya Vidyalaya, Delhi</p>
+            <p className="relative text-sm text-gray-700">Class XII (2022): 78% | Class X (2020): 79%</p>
+          </motion.div>
         </motion.div>
 
         <motion.a
           href="#skills"
           onClick={(e) => handleNavClick(e, "#skills")}
-          className="mt-10 inline-block px-8 py-3 rounded-full border border-gray-900 text-gray-900 font-medium bg-white/90 hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-12 inline-block px-10 py-4 rounded-full border border-gray-900 text-gray-900 font-semibold bg-white/95 hover:text-white transition-all duration-400 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)" }}
-          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+          whileHover={{
+            scale: 1.08,
+            background: "linear-gradient(to right, #1f2937, #374151)",
+            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.25)",
+          }}
+          whileTap={{ scale: 0.92 }}
           aria-label="Explore my skills"
         >
           Explore My Skills
