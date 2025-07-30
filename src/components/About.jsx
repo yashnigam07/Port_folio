@@ -10,7 +10,6 @@ export default function About() {
   const overlayRef = useRef(null);
   const isInView = useInView(aboutRef, { once: true, amount: 0.5 });
 
-  // Handle smooth scrolling
   const handleNavClick = (e, href) => {
     e.preventDefault();
     const target = document.querySelector(href);
@@ -20,40 +19,41 @@ export default function About() {
   };
 
   useEffect(() => {
-    if (isInView) {
-      const tl = gsap.timeline({
+    if (!isInView) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: aboutRef.current,
+        start: "top 75%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    tl.fromTo(
+      aboutRef.current.querySelectorAll(".about-content > *"),
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
+    );
+
+    const parallaxTween = gsap.fromTo(
+      overlayRef.current,
+      { y: -50 },
+      {
+        y: 50,
         scrollTrigger: {
           trigger: aboutRef.current,
-          start: "top 75%",
-          toggleActions: "play none none none",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5,
         },
-      });
-      tl.fromTo(
-        aboutRef.current.querySelectorAll(".about-content > *"),
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
-      );
+      }
+    );
 
-      // Parallax effect for overlay
-      gsap.fromTo(
-        overlayRef.current,
-        { y: -50 },
-        {
-          y: 50,
-          scrollTrigger: {
-            trigger: aboutRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.5,
-          },
-        }
-      );
-
-      return () => {
-        tl.kill();
-        ScrollTrigger.getAll().forEach((st) => st.kill());
-      };
-    }
+    return () => {
+      tl.kill();
+      parallaxTween.kill();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, [isInView]);
 
   return (
@@ -64,10 +64,11 @@ export default function About() {
       aria-labelledby="about-title"
       aria-describedby="about-description"
     >
-      {/* Glass Gradient Overlay */}
+      {/* Parallax Glass Overlay */}
       <div
         ref={overlayRef}
         className="absolute inset-0 z-0 bg-gradient-to-b from-white/25 via-gray-100/15 to-white/50 backdrop-blur-xl transition-all duration-700"
+        aria-hidden="true"
       />
 
       {/* About Content */}
@@ -77,6 +78,7 @@ export default function About() {
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1 }}
       >
+        {/* Section Heading */}
         <motion.h2
           id="about-title"
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 drop-shadow-md"
@@ -87,6 +89,7 @@ export default function About() {
           About Me
         </motion.h2>
 
+        {/* Intro Paragraph */}
         <motion.p
           id="about-description"
           className="mt-8 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto tracking-wide font-medium"
@@ -94,16 +97,17 @@ export default function About() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
         >
-          I'm Yash Nigam, a passionate B.Sc. Electronics student at Sri Venkateswara College, University of Delhi, graduating in 2026. As a Frontend Developer and Creative Technologist, I blend technology and creativity to build immersive digital experiences. My journey is fueled by innovation, from crafting elegant web interfaces to exploring 3D modeling and IoT solutions.
+          I'm <strong className="text-gray-900">Yash Nigam</strong>, a B.Sc. Electronics student at Sri Venkateswara College, University of Delhi (Graduating 2026). As a <strong>Frontend Developer</strong> and <strong>Creative Technologist</strong>, I thrive on blending creativity with technology to craft immersive, aesthetic digital experiences. From elegant web design to interactive 3D visuals and IoT integrations, my projects reflect curiosity and innovation.
         </motion.p>
 
-        {/* Education Section */}
+        {/* Education Cards */}
         <motion.div
           className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
         >
+          {/* College */}
           <motion.div
             className="relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
             whileHover={{ scale: 1.05, rotate: 1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
@@ -114,6 +118,8 @@ export default function About() {
             <p className="relative text-sm text-gray-700 mt-3">Sri Venkateswara College, University of Delhi</p>
             <p className="relative text-sm text-gray-700">2023 – 2026 | 6.45 CGPA</p>
           </motion.div>
+
+          {/* High School */}
           <motion.div
             className="relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
             whileHover={{ scale: 1.05, rotate: -1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
@@ -122,10 +128,13 @@ export default function About() {
             <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-white/10 rounded-2xl" />
             <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight">High School</h3>
             <p className="relative text-sm text-gray-700 mt-3">Kendriya Vidyalaya, Delhi</p>
-            <p className="relative text-sm text-gray-700">Class XII (2022): 78% | Class X (2020): 79%</p>
+            <p className="relative text-sm text-gray-700">
+              Class XII (2022): 78% <br /> Class X (2020): 79%
+            </p>
           </motion.div>
         </motion.div>
 
+        {/* CTA Button */}
         <motion.a
           href="#skills"
           onClick={(e) => handleNavClick(e, "#skills")}

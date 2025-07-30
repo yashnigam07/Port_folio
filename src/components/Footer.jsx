@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,84 +8,136 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Footer() {
   const footerRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
+    const footerEl = footerRef.current;
+
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: footerRef.current,
-        start: "top 85%",
+        trigger: footerEl,
+        start: "top 80%",
         toggleActions: "play none none none",
       },
     });
 
+    // Animate heading
     tl.fromTo(
-      footerRef.current,
-      { opacity: 0, y: 60 },
-      { opacity: 1, y: 0, duration: 1.2, ease: "power3.out" }
+      footerEl.querySelector(".footer-content > :first-child"),
+      { opacity: 0, y: -20 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
     );
 
-    return () => tl.kill();
+    // Animate contact info and social links
+    tl.fromTo(
+      footerEl.querySelectorAll(".footer-content > :nth-child(2), .footer-content > :nth-child(3)"),
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.2, ease: "power3.out" },
+      "-=0.5"
+    );
+
+    // Animate copyright
+    tl.fromTo(
+      footerEl.querySelector(".footer-content > :last-child"),
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
+      "-=0.3"
+    );
+
+    // Parallax effect for overlay
+    gsap.fromTo(
+      overlayRef.current,
+      { y: -30 },
+      {
+        y: 30,
+        scrollTrigger: {
+          trigger: footerEl,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      }
+    );
+
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, []);
 
   return (
     <footer
       ref={footerRef}
-      className="relative overflow-hidden bg-white py-16 px-4 sm:px-8 text-gray-800 shadow-inner"
+      className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-200 overflow-hidden"
+      aria-labelledby="footer-title"
     >
-      {/* Background overlay with gradient & texture */}
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-100 to-white opacity-70 z-0" />
+      {/* Glass Gradient Overlay */}
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-0 bg-gradient-to-br from-white/20 via-gray-100/10 to-white/40 backdrop-blur-lg transition-opacity duration-500"
+      />
 
+      {/* Footer Content */}
       <motion.div
-        className="relative z-10 max-w-5xl mx-auto text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        className="relative z-10 max-w-6xl mx-auto text-center footer-content space-y-8"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        {/* Title */}
         <motion.h2
-          className="text-4xl font-extrabold text-gray-900 mb-6 tracking-tight"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
+          id="footer-title"
+          className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           Let's Connect
         </motion.h2>
 
         {/* Contact Info */}
         <motion.div
-          className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-5 sm:gap-10 text-gray-700"
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
+          className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-12 text-gray-600"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
         >
-          <div className="flex items-center gap-3 hover:text-gray-900 transition-colors">
+          <motion.a
+            href="tel:+919810379355"
+            className="flex items-center gap-3 text-sm font-medium hover:text-gray-900 transition-colors duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Phone number: (+91)-9810379355"
+          >
             <FaPhone className="text-lg text-gray-600" />
-            <a href="tel:+919810379355" aria-label="Phone">
-              (+91)-9810379355
-            </a>
-          </div>
-          <div className="flex items-center gap-3 hover:text-gray-900 transition-colors">
+            (+91)-9810379355
+          </motion.a>
+          <motion.a
+            href="mailto:nigam.yash7070@gmail.com"
+            className="flex items-center gap-3 text-sm font-medium hover:text-gray-900 transition-colors duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Email: nigam.yash7070@gmail.com"
+          >
             <FaEnvelope className="text-lg text-gray-600" />
-            <a href="mailto:nigam.yash7070@gmail.com" aria-label="Email">
-              nigam.yash7070@gmail.com
-            </a>
-          </div>
+            nigam.yash7070@gmail.com
+          </motion.a>
         </motion.div>
 
         {/* Social Links */}
         <motion.div
-          className="mt-8 flex justify-center gap-6"
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
+          className="flex justify-center gap-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
         >
           <motion.a
             href="https://linkedin.com/in/yashnigam04"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 hover:text-gray-900 transition-colors duration-300"
             whileHover={{ scale: 1.2, rotate: 5 }}
-            aria-label="LinkedIn"
+            whileTap={{ scale: 0.95 }}
+            aria-label="Visit Yash Nigam's LinkedIn profile"
           >
             <FaLinkedin className="text-3xl" />
           </motion.a>
@@ -93,9 +145,10 @@ export default function Footer() {
             href="https://github.com/yashnigam07"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 hover:text-gray-900 transition-colors duration-300"
             whileHover={{ scale: 1.2, rotate: -5 }}
-            aria-label="GitHub"
+            whileTap={{ scale: 0.95 }}
+            aria-label="Visit Yash Nigam's GitHub profile"
           >
             <FaGithub className="text-3xl" />
           </motion.a>
@@ -103,10 +156,10 @@ export default function Footer() {
 
         {/* Copyright */}
         <motion.p
-          className="mt-10 text-sm text-gray-500"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
+          className="mt-8 text-sm text-gray-500 font-medium"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
         >
           © {new Date().getFullYear()} Yash Nigam. All rights reserved.
         </motion.p>

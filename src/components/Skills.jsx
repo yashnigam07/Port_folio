@@ -10,25 +10,20 @@ export default function Skills() {
   const overlayRef = useRef(null);
   const isInView = useInView(skillsRef, { once: true, amount: 0.4 });
 
-  // Memoize skills array to prevent re-renders
-  const skills = useMemo(
-    () => [
-      { category: "Programming", items: ["C", "Embedded C", "C++", "R", "Python", "LaTeX"] },
-      { category: "Frontend", items: ["HTML", "CSS", "JavaScript", "Tailwind CSS", "React", "Flutter"] },
-      { category: "Backend", items: ["Django", "Node.js"] },
-      { category: "Databases", items: ["MySQL"] },
-      { category: "Version Control", items: ["Git", "GitHub"] },
-      { category: "Python Libraries", items: ["NumPy", "Pandas", "Matplotlib", "Scikit-learn", "Tkinter", "Turtle"] },
-      { category: "Design", items: ["Canva", "Figma"] },
-      { category: "Website Builders", items: ["WordPress", "Wix"] },
-      { category: "3D Modeling", items: ["Fusion 360", "Pronterface", "3D Slicer"] },
-      { category: "AI Tools", items: ["ChatGPT", "Perplexity", "Claude", "Midjourney", "GitHub Copilot"] },
-      { category: "Soft Skills", items: ["Problem Solving", "Adaptability", "Time Management", "Active Listening"] },
-    ],
-    []
-  );
+  const skills = useMemo(() => [
+    { category: "Programming", items: ["C", "Embedded C", "C++", "R", "Python", "LaTeX"] },
+    { category: "Frontend", items: ["HTML", "CSS", "JavaScript", "Tailwind CSS", "React", "Flutter"] },
+    { category: "Backend", items: ["Django", "Node.js"] },
+    { category: "Databases", items: ["MySQL"] },
+    { category: "Version Control", items: ["Git", "GitHub"] },
+    { category: "Python Libraries", items: ["NumPy", "Pandas", "Matplotlib", "Scikit-learn", "Tkinter", "Turtle"] },
+    { category: "Design", items: ["Canva", "Figma"] },
+    { category: "Website Builders", items: ["WordPress", "Wix"] },
+    { category: "3D Modeling", items: ["Fusion 360", "Pronterface", "3D Slicer"] },
+    { category: "AI Tools", items: ["ChatGPT", "Perplexity", "Claude", "Midjourney", "GitHub Copilot"] },
+    { category: "Soft Skills", items: ["Problem Solving", "Adaptability", "Time Management", "Active Listening"] },
+  ], []);
 
-  // Handle smooth scrolling
   const handleNavClick = (e, href) => {
     e.preventDefault();
     const target = document.querySelector(href);
@@ -38,65 +33,64 @@ export default function Skills() {
   };
 
   useEffect(() => {
-    if (isInView) {
-      const tl = gsap.timeline({
+    if (!isInView) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: skillsRef.current,
+        start: "top 75%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    tl.fromTo(
+      skillsRef.current.querySelectorAll(".skills-content > :first-child, .skills-content > :nth-child(2)"),
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
+    );
+
+    tl.fromTo(
+      skillsRef.current.querySelectorAll(".skill-card"),
+      { opacity: 0, y: 50, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: "back.out(1.2)" },
+      "-=0.6"
+    );
+
+    gsap.fromTo(
+      overlayRef.current,
+      { y: -50 },
+      {
+        y: 50,
         scrollTrigger: {
           trigger: skillsRef.current,
-          start: "top 75%",
-          toggleActions: "play none none none",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5,
         },
-      });
+      }
+    );
 
-      // Animate heading and description
-      tl.fromTo(
-        skillsRef.current.querySelectorAll(".skills-content > :first-child, .skills-content > :nth-child(2)"),
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.2, ease: "back.out(1.4)", stagger: 0.25 }
-      );
+    // GSAP hover animation on skill items
+    const skillItems = skillsRef.current.querySelectorAll(".skill-item");
 
-      // Animate skill cards
-      tl.fromTo(
-        skillsRef.current.querySelectorAll(".skill-card"),
-        { opacity: 0, y: 50, scale: 0.92 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: "back.out(1.2)" },
-        "-=0.6"
-      );
+    const hoverEnter = (e) =>
+      gsap.to(e.currentTarget, { x: 10, scale: 1.05, duration: 0.4, ease: "back.out(1.4)" });
+    const hoverLeave = (e) =>
+      gsap.to(e.currentTarget, { x: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" });
 
-      // Parallax effect for overlay
-      gsap.fromTo(
-        overlayRef.current,
-        { y: -50 },
-        {
-          y: 50,
-          scrollTrigger: {
-            trigger: skillsRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.5,
-          },
-        }
-      );
+    skillItems.forEach((item) => {
+      item.addEventListener("mouseenter", hoverEnter);
+      item.addEventListener("mouseleave", hoverLeave);
+    });
 
-      // Animate individual skill items on hover
-      const skillItems = skillsRef.current.querySelectorAll(".skill-item");
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
       skillItems.forEach((item) => {
-        item.addEventListener("mouseenter", () => {
-          gsap.to(item, { x: 10, scale: 1.05, duration: 0.4, ease: "back.out(1.4)" });
-        });
-        item.addEventListener("mouseleave", () => {
-          gsap.to(item, { x: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" });
-        });
+        item.removeEventListener("mouseenter", hoverEnter);
+        item.removeEventListener("mouseleave", hoverLeave);
       });
-
-      return () => {
-        tl.kill();
-        ScrollTrigger.getAll().forEach((st) => st.kill());
-        skillItems.forEach((item) => {
-          item.removeEventListener("mouseenter", () => {});
-          item.removeEventListener("mouseleave", () => {});
-        });
-      };
-    }
+    };
   }, [isInView]);
 
   return (
@@ -107,13 +101,14 @@ export default function Skills() {
       aria-labelledby="skills-title"
       aria-describedby="skills-description"
     >
-      {/* Glassmorphism Overlay */}
+      {/* Background Overlay */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 z-0 bg-gradient-to-br from-white/25 via-gray-100/15 to-white/50 backdrop-blur-xl transition-all duration-700"
+        className="absolute inset-0 z-0 bg-gradient-to-br from-white/25 via-gray-100/15 to-white/50 backdrop-blur-xl"
+        aria-hidden="true"
       />
 
-      {/* Skills Content */}
+      {/* Content */}
       <motion.div
         className="z-10 max-w-7xl mx-auto text-center skills-content"
         initial={{ opacity: 0 }}
@@ -137,40 +132,42 @@ export default function Skills() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
         >
-          A versatile skill set spanning programming, web development, design, and 3D modeling, driven by strong problem-solving and adaptability.
+          A versatile skill set spanning programming, web development, design, 3D modeling, and creative tools—backed by strong problem-solving and adaptability.
         </motion.p>
 
-        {/* Skills Grid */}
+        {/* Skill Cards */}
         <motion.div
           className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
         >
-          {skills.map((skillGroup, index) => (
+          {skills.map((group, index) => (
             <motion.div
               key={index}
-              className="skill-card relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-400 border border-white/20"
-              whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? 1 : -1, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)" }}
+              className="skill-card relative bg-white/40 backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl border border-white/20"
+              whileHover={{
+                scale: 1.05,
+                rotate: index % 2 === 0 ? 1 : -1,
+                boxShadow: "0 12px 24px rgba(0,0,0,0.2)",
+              }}
               whileTap={{ scale: 0.98 }}
               role="group"
-              aria-label={`Skills in ${skillGroup.category}`}
               tabIndex={0}
-              onKeyDown={(e) => e.key === "Enter" && e.currentTarget.focus()}
+              aria-label={`Skills in ${group.category}`}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-white/10 rounded-2xl" />
-              <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight mb-5">{skillGroup.category}</h3>
+              <h3 className="relative text-lg font-semibold text-gray-900 tracking-tight mb-5">
+                {group.category}
+              </h3>
               <ul className="relative text-sm text-gray-700 space-y-3">
-                {skillGroup.items.map((item, i) => (
+                {group.items.map((item, i) => (
                   <motion.li
                     key={i}
-                    className="skill-item flex items-center transition-colors duration-200"
-                    whileHover={{ color: "#1f2937" }}
+                    className="skill-item flex items-center cursor-default"
                     tabIndex={0}
-                    role="listitem"
-                    onKeyDown={(e) => e.key === "Enter" && e.currentTarget.focus()}
                   >
-                    <span className="w-2.5 h-2.5 bg-gray-600 rounded-full mr-3.5"></span>
+                    <span className="w-2.5 h-2.5 bg-gray-600 rounded-full mr-3.5" />
                     {item}
                   </motion.li>
                 ))}
@@ -179,6 +176,7 @@ export default function Skills() {
           ))}
         </motion.div>
 
+        {/* Call to Action */}
         <motion.a
           href="#projects"
           onClick={(e) => handleNavClick(e, "#projects")}
@@ -193,7 +191,6 @@ export default function Skills() {
             rotate: 1,
           }}
           whileTap={{ scale: 0.92 }}
-          aria-label="View my projects"
         >
           View My Projects
         </motion.a>

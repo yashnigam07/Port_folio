@@ -7,29 +7,52 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Experience() {
   const experienceRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
+    const experienceEl = experienceRef.current;
+
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: experienceRef.current,
+        trigger: experienceEl,
         start: "top 80%",
         toggleActions: "play none none none",
       },
     });
 
+    // Animate heading and description
     tl.fromTo(
-      experienceRef.current,
+      experienceEl.querySelectorAll(".experience-content > :first-child, .experience-content > :nth-child(2)"),
       { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out", stagger: 0.2 }
+    );
+
+    // Animate experience cards
+    tl.fromTo(
+      experienceEl.querySelectorAll(".experience-card"),
+      { opacity: 0, y: 40, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.15, ease: "power3.out" },
+      "-=0.5"
+    );
+
+    // Parallax effect for overlay
+    gsap.fromTo(
+      overlayRef.current,
+      { y: -30 },
       {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: "power3.out",
+        y: 30,
+        scrollTrigger: {
+          trigger: experienceEl,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
       }
     );
 
     return () => {
       tl.kill();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
 
@@ -72,91 +95,78 @@ export default function Experience() {
     },
   ];
 
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.95, rotate: -2 },
-    visible: (i) => ({
-      opacity: 1,
-      scale: 1,
-      rotate: 0,
-      transition: {
-        delay: i * 0.15,
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    }),
-  };
-
   return (
     <section
       id="experience"
       ref={experienceRef}
-      className="relative min-h-screen flex items-center justify-center py-16 px-4 bg-gradient-to-b from-gray-100 to-white"
+      className="relative min-h-screen flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-200 overflow-hidden"
       aria-labelledby="experience-title"
     >
       {/* Glass Gradient Overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/35 via-gray-100/15 to-white/65 backdrop-blur-md" />
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-0 bg-gradient-to-br from-white/20 via-gray-100/10 to-white/40 backdrop-blur-lg transition-opacity duration-500"
+      />
 
       {/* Experience Content */}
       <motion.div
-        className="z-10 max-w-5xl mx-auto text-center"
+        className="z-10 max-w-6xl mx-auto text-center experience-content space-y-8"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.h2
           id="experience-title"
-          className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-600"
-          initial={{ opacity: 0, y: -10 }}
+          className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600"
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           My Experience
         </motion.h2>
 
         <motion.p
-          className="mt-4 text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 10 }}
+          className="mt-4 text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto font-medium"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         >
           A blend of technical expertise and creative leadership, from research and workshops to event organization and impactful design.
         </motion.p>
 
         {/* Experience Grid */}
         <motion.div
-          className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
         >
           {experiences.map((exp, index) => (
             <motion.div
               key={index}
-              custom={index}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              className="bg-white/40 backdrop-blur-md rounded-xl p-6 border border-gray-200/50 shadow-lg hover:shadow-xl hover:border-gray-400/50 transition-all duration-300"
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)" }}
+              className="experience-card relative bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200/50"
+              whileHover={{ scale: 1.03, rotate: index % 2 === 0 ? 0.5 : -0.5, boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)" }}
               whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.3 }}
               role="group"
-              aria-label={`Experience: ${exp.title}`}
+              aria-label={`Experience: ${exp.title} at ${exp.organization}`}
             >
-              <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
-              <p className="text-sm text-gray-600">{exp.organization}</p>
-              <p className="text-sm text-gray-600">{exp.period}</p>
-              <p className="mt-3 text-sm text-gray-700 leading-relaxed">{exp.description}</p>
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100/10 to-white/10 rounded-xl -z-10" />
+              <h3 className="text-xl font-semibold text-gray-800">{exp.title}</h3>
+              <p className="mt-1 text-sm text-gray-600 font-medium">{exp.organization}</p>
+              <p className="text-sm text-gray-500">{exp.period}</p>
+              <p className="mt-3 text-sm text-gray-600 leading-relaxed">{exp.description}</p>
             </motion.div>
           ))}
         </motion.div>
 
         <motion.a
           href="#achievements"
-          className="mt-10 inline-block px-8 py-3 rounded-full border border-gray-900 text-gray-900 font-medium bg-white/85 hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          whileHover={{ scale: 1.1, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)" }}
+          className="mt-10 inline-block px-8 py-3 rounded-full border border-gray-800 text-gray-800 font-semibold bg-white/90 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-700 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+          whileHover={{ scale: 1.05, boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)" }}
           whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3 }}
           aria-label="View my achievements"
         >
           View My Achievements

@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Contact() {
   const contactRef = useRef(null);
+  const overlayRef = useRef(null);
   const [formStatus, setFormStatus] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -15,28 +16,49 @@ export default function Contact() {
   });
 
   useEffect(() => {
+    const contactEl = contactRef.current;
+
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: contactRef.current,
-        start: "top 85%",
+        trigger: contactEl,
+        start: "top 80%",
         toggleActions: "play none none none",
       },
     });
 
+    // Animate heading and description
     tl.fromTo(
-      contactRef.current,
-      { opacity: 0, y: 30, scale: 0.98 },
+      contactEl.querySelectorAll(".contact-content > :first-child, .contact-content > :nth-child(2)"),
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out", stagger: 0.2 }
+    );
+
+    // Animate form fields
+    tl.fromTo(
+      contactEl.querySelectorAll(".contact-form > div, .contact-form > button"),
+      { opacity: 0, x: -20 },
+      { opacity: 1, x: 0, duration: 0.7, stagger: 0.15, ease: "power3.out" },
+      "-=0.5"
+    );
+
+    // Parallax effect for overlay
+    gsap.fromTo(
+      overlayRef.current,
+      { y: -30 },
       {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease: "power3.out",
+        y: 30,
+        scrollTrigger: {
+          trigger: contactEl,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
       }
     );
 
     return () => {
       tl.kill();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
 
@@ -65,80 +87,44 @@ export default function Contact() {
       setFormStatus({ type: "error", message: "An error occurred. Please try again later." });
     }
 
-    // Clear status message after 5 seconds
     setTimeout(() => setFormStatus(null), 5000);
-  };
-
-  const fieldVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.2,
-        duration: 0.6,
-        ease: "easeOut",
-        type: "spring",
-        stiffness: 100,
-      },
-    }),
-  };
-
-  const buttonVariants = {
-    hover: {
-      scale: 1.05,
-      boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)",
-      transition: {
-        duration: 0.3,
-        yoyo: Infinity,
-        ease: "easeInOut",
-      },
-    },
-    tap: { scale: 0.98 },
-  };
-
-  const messageVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
   };
 
   return (
     <section
       id="contact"
       ref={contactRef}
-      className="relative min-h-screen flex items-center justify-center py-16 px-4 bg-gradient-to-b from-gray-100 to-white"
+      className="relative min-h-screen flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-200 overflow-hidden"
       aria-labelledby="contact-title"
     >
       {/* Glass Gradient Overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/35 via-gray-100/15 to-white/65 backdrop-blur-md" />
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-0 bg-gradient-to-br from-white/20 via-gray-100/10 to-white/40 backdrop-blur-lg transition-opacity duration-500"
+      />
 
       {/* Contact Content */}
       <motion.div
-        className="z-10 max-w-lg mx-auto text-center"
+        className="z-10 max-w-lg mx-auto text-center contact-content space-y-8"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.h2
           id="contact-title"
-          className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-800 to-gray-600"
-          initial={{ opacity: 0, y: -10 }}
+          className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600"
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           Get in Touch
         </motion.h2>
 
         <motion.p
-          className="mt-4 text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 10 }}
+          className="mt-4 text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto font-medium"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         >
           I'm excited to connect and explore opportunities to collaborate on innovative projects. Drop me a message!
         </motion.p>
@@ -146,86 +132,86 @@ export default function Contact() {
         {/* Contact Form */}
         <motion.form
           onSubmit={handleSubmit}
-          className="mt-10 bg-white/40 backdrop-blur-md rounded-xl p-6 border border-gray-200/50 shadow-lg"
+          className="contact-form mt-12 bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-xl border border-gray-200/50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
         >
-          <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="visible">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="mt-1 w-full p-2 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 placeholder-gray-500"
-              placeholder="Your Name"
-              aria-label="Name"
-            />
-          </motion.div>
+          <motion.div className="space-y-5">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full p-3 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                placeholder="Your Name"
+                aria-label="Your name"
+              />
+            </div>
 
-          <motion.div custom={1} variants={fieldVariants} initial="hidden" animate="visible" className="mt-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="mt-1 w-full p-2 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 placeholder-gray-500"
-              placeholder="Your Email"
-              aria-label="Email"
-            />
-          </motion.div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full p-3 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                placeholder="Your Email"
+                aria-label="Your email"
+              />
+            </div>
 
-          <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="visible" className="mt-4">
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-              Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              required
-              className="mt-1 w-full p-2 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 placeholder-gray-500"
-              placeholder="Your Message"
-              rows="4"
-              aria-label="Message"
-            />
-          </motion.div>
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full p-3 rounded-md border border-gray-300 bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                placeholder="Your Message"
+                rows="4"
+                aria-label="Your message"
+              />
+            </div>
 
-          <motion.button
-            type="submit"
-            custom={3}
-            variants={fieldVariants}
-            initial="hidden"
-            animate="visible"
-            whileHover={buttonVariants.hover}
-            whileTap={buttonVariants.tap}
-            className="mt-6 w-full px-4 py-2 rounded-full border border-gray-900 text-gray-900 font-medium bg-white/85 hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            aria-label="Submit message"
-          >
-            Send Message
-          </motion.button>
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.05, boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)" }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full px-4 py-3 rounded-full border border-gray-800 text-gray-800 font-semibold bg-white/90 hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-700 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+              aria-label="Submit contact form"
+            >
+              Send Message
+            </motion.button>
+          </motion.div>
 
           {/* Form Status Message */}
           <AnimatePresence>
             {formStatus && (
               <motion.div
-                variants={messageVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className={`mt-4 p-3 rounded-md text-sm font-medium ${
-                  formStatus.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  formStatus.type === "success"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
                 }`}
                 role="alert"
                 aria-live="polite"
