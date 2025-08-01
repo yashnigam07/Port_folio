@@ -1,6 +1,6 @@
 @import "tailwindcss";
 body {
   @apply bg-white text-black font-sans transition-colors duration-300;
-  font-family: 'Inter', sans-serif;
+  font-family: '"Glory"', 'sans-serif';
 }
 
